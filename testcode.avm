@@ -1,0 +1,2 @@
+﻿pop eax
+pop [eax]
