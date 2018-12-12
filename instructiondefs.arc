@@ -3,6 +3,7 @@ movrr
 movrm
 movrc
 movmr
+movmc
 addrr
 addrm
 addrc
@@ -18,7 +19,10 @@ pushm
 pushc
 popr
 popm
-cmp
+cmprr
+cmprm
+cmprc
+cmpmr
 jmp
 je
 jne
