@@ -13,8 +13,13 @@ namespace AVC
         private static Dictionary<string, byte> RegisterCodes;
         private static Dictionary<string, int> RegisterSizes;
         private static Dictionary<string, string> Flags;
+        private static Dictionary<string, int> PointerList;
         public static IAsseblerVirtualModule[] ModuleList;
-        
+        private static bool IsPointer(string command)
+        {
+            Commands.ClearCommand(ref command);
+            return command[command.Length - 1] == ':';
+        }
         private static List<byte> Binary;
         private static void LoadRegisterInfo(string path = "registerdefs.arc")
         {
@@ -49,7 +54,18 @@ namespace AVC
             StreamReader reader = new StreamReader(path);
             List<string> result = new List<string>();
             while (!reader.EndOfStream)
-                result.Add(reader.ReadLine());
+            {
+                string tmp = reader.ReadLine();
+                int pos = tmp.IndexOf('#');
+                if (pos > 0)
+                    tmp = tmp.Substring(0, pos);
+                pos = tmp.IndexOf('\t');
+                    if (pos > 0)
+                    tmp = tmp.Substring(0, pos);
+                if (tmp.Length == 0)
+                    continue;
+                result.Add(tmp);
+            }
             return result.ToArray();
         }
         private static void InitModules(IAsseblerVirtualModule[] moduleList)
@@ -74,34 +90,60 @@ namespace AVC
                 }
             }
         }
-        public static void Compile(string path)
+        public static byte[] Compile(string path)
         {
             LoadFlags();
             Binary = new List<byte>();
+            PointerList = new Dictionary<string, int>();
             BaitCodeList = LoadBaitCodes();
             LoadRegisterInfo();
             ModuleList = Connector.GetConnectedModudels();
             InitModules(ModuleList);
             string[] Code = ReadCode(path);
             string Command;
-            foreach (string Instruction in Code)
+            for(int i = 0 ; i < Code.Length;i++)
             {
+                string Instruction = Code[i];
+                if(IsPointer(Instruction))
+                {
+                    Commands.ClearCommand(ref Instruction);
+                    PointerList.Add(Instruction.Substring(0,Instruction.Length-1), Binary.Count);
+                    if (i + 1 == Code.Length)
+                        throw new Exception("No instruction after marker");
+                    continue;
+                }
                 Command = Instruction.Substring(0, Instruction.IndexOf(' '));
                 foreach(IAsseblerVirtualModule module in ModuleList)
                 {
                     if (module.IsRealised(Command))
+                    {
+                        if(module.IsLinkable())
+                        {
+                            string[] args = Commands.GetArguments(Instruction);
+                            module.InitLink(args[0], Binary.Count + 1);
+                        }
                         Binary.AddRange(module.Compile(Instruction));
+                            
+                    }
                 }
+            }
+            foreach(IAsseblerVirtualModule module in ModuleList)
+            {
+                if (module .IsLinkable())
+                    module.Link(PointerList,Binary);
             }
             foreach (byte a in Binary)
                 Console.WriteLine(a);
+            return Binary.ToArray();
         }
     }
     class Program
     {
         static void Main(string[] args)
         {
-            AVC.AVComplier.Compile("testcode.avm");
+            
+            byte[] binary = AVC.AVComplier.Compile("testcode.avm");
+            File.WriteAllBytes("output.binavm", binary);
         }
     }
 }

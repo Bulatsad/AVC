@@ -13,7 +13,8 @@ namespace AVI
         private Dictionary<string, byte> RegisterCodes;
         private Dictionary<string, int> RegisterSizes;
         private Dictionary<string, string> Flags;
-		private List<byte>PUSHR(string from)
+
+        private List<byte>PUSHR(string from)
         {
             List<byte> result = new List<byte>();
             result.Add(BaitCodeList["pushr"]);
@@ -61,6 +62,26 @@ namespace AVI
         public bool IsRealised(string instruction)
         {
             return instruction == "push";
+        }
+
+        public void InitLink(string pointer, int address)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Link(Dictionary<string, int> PointerList, List<byte> Binary)
+        {
+            throw new NotImplementedException();
+        }
+        public bool IsLinkable()
+        {
+            return false;
+        }
+        public bool IsExecutable(byte baitCode)
+        {
+            return baitCode == BaitCodeList["pushr"] ||
+                baitCode == BaitCodeList["pushm"] ||
+                baitCode == BaitCodeList["pushc"];
         }
     }
 }

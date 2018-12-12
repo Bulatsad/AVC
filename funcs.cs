@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,6 +8,21 @@ namespace AVC
 {
     class Commands
     {
+        public static bool IsConstant(string code, Dictionary<string, byte> RegisterCodes)
+        {
+            return !(IsRegister(code, RegisterCodes) ^ IsMemory(code, RegisterCodes));
+        }
+        public static bool IsMemory(string code, Dictionary<string, byte> RegisterCodes)
+        {
+            if (code.Length <= 2)
+                return false;
+            return IsRegister(code.Substring(1, code.Length - 2), RegisterCodes);
+        }
+        public static bool IsRegister(string code, Dictionary<string, byte> RegisterCodes)
+        {
+            byte rubbish;
+            return RegisterCodes.TryGetValue(code, out rubbish);
+        }
         public static byte[] CompleteToLenght(byte[] line, int targetLenght)
         {
             List<byte> result = new List<byte>(line);
@@ -75,5 +89,6 @@ namespace AVC
             }
 
         }
+        
     }
 }

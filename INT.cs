@@ -7,35 +7,19 @@ using AVC;
 
 namespace AVI
 {
-    class DIV : IAsseblerVirtualModule
+    class INT : IAsseblerVirtualModule
     {
         private Dictionary<string, byte> BaitCodeList;
         private Dictionary<string, byte> RegisterCodes;
         private Dictionary<string, int> RegisterSizes;
         private Dictionary<string, string> Flags;
-        private List<byte> DIVR(string to)
-        {
-            List<byte> result = new List<byte>();
-            result.Add(BaitCodeList["divr"]);
-            result.Add(RegisterCodes[to]);
-            return result;
-        }
-        private List<byte> DIVM(string to)
-        {
-            List<byte> result = new List<byte>();
-            result.Add(BaitCodeList["divm"]);
-            result.Add(RegisterCodes[to.Substring(1, to.Length - 2)]);
-            return result;
-        }
-
         public byte[] Compile(string instruction)
         {
             string[] args = Commands.GetArguments(instruction);
-            List<byte> binaryinst = null;
-            byte rubbish;
-            if (args[0][0] == '[' && args[0][args[0].Length - 1] == ']') binaryinst = DIVM(args[0]);
-            else if (RegisterCodes.TryGetValue(args[0], out rubbish)) binaryinst = DIVR(args[0]);
-            return binaryinst.ToArray();
+            List<byte> result = new List<byte>();
+            result.Add(BaitCodeList["int"]);
+            result.Add(Convert.ToByte(Convert.ToInt32(args[0])));
+            return result.ToArray();
         }
 
         public void Execute<RegisteTypeName, RAMTypeName>(out RegisteTypeName Registers, out RAMTypeName RAM)
@@ -51,28 +35,28 @@ namespace AVI
             Flags = Flags_;
         }
 
-        public bool IsRealised(string instruction)
-        {
-            return instruction == "div";
-        }
-
         public void InitLink(string pointer, int address)
         {
             throw new NotImplementedException();
+        }
+
+        public bool IsLinkable()
+        {
+            return false;
+        }
+
+        public bool IsRealised(string instruction)
+        {
+            return instruction == "int";
         }
 
         public void Link(Dictionary<string, int> PointerList, List<byte> Binary)
         {
             throw new NotImplementedException();
         }
-        public bool IsLinkable()
-        {
-            return false;
-        }
         public bool IsExecutable(byte baitCode)
         {
-            return baitCode == BaitCodeList["divr"] ||
-                baitCode == BaitCodeList["divm"];
+            return baitCode == BaitCodeList["int"];
         }
     }
 }

@@ -66,6 +66,26 @@ namespace AVI
         {
             return instruction == "sub";
         }
-        
+
+        public void InitLink(string pointer, int address)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Link(Dictionary<string, int> PointerList, List<byte> Binary)
+        {
+            throw new NotImplementedException();
+        }
+        public bool IsLinkable()
+        {
+            return false;
+        }
+
+        public bool IsExecutable(byte baitCode)
+        {
+            return baitCode == BaitCodeList["subrr"] ||
+                baitCode == BaitCodeList["subrm"] ||
+                baitCode == BaitCodeList["subrc"];
+        }
     }
 }

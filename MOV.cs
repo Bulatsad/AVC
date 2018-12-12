@@ -45,15 +45,21 @@ namespace AVI
             result.Add(RegisterCodes[from]);
             return result;
         }
-
-        public MOV(){}
-
+        private List<byte> MOVMC(string to, string from)
+        {
+            List<byte> result = new List<byte>();
+            result.Add(BaitCodeList["movmc"]);
+            result.Add(RegisterCodes[to.Substring(1, to.Length - 2)]);
+            result.AddRange(Commands.ConvertToByte(Convert.ToInt64(from), RegisterSizes[to.Substring(1, to.Length - 2)]));
+            return result;
+        }
         public byte[] Compile(string instruction)
         {
             string[] args = Commands.GetArguments(instruction);
             List<byte> binaryinst = null;
             byte rubbish;
-            if (args[0][0] == '[' && args[0][args[0].Length - 1] == ']') binaryinst = MOVMR(args[0], args[1]);
+            if (args[0][0] == '[' && args[0][args[0].Length - 1] == ']' && RegisterCodes.TryGetValue(args[1], out rubbish)) binaryinst = MOVMR(args[0], args[1]);
+            else if (args[0][0] == '[' && args[0][args[0].Length - 1] == ']') binaryinst = MOVMC(args[0], args[1]);
             else if (RegisterCodes.TryGetValue(args[1], out rubbish)) binaryinst = MOVRR(args[0], args[1]);
             else if (args[1][0] == '[' && args[1][args[1].Length - 1] == ']') binaryinst = MOVRM(args[0], args[1]);
             else binaryinst = MOVRC(args[0], args[1]);
@@ -76,6 +82,28 @@ namespace AVI
             RegisterSizes = RegisterSizes_;
             BaitCodeList = BaitCodeList_;
             Flags = Flags_;
+        }
+
+        public void InitLink(string pointer, int address)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Link(Dictionary<string, int> PointerList, List<byte> Binary)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsLinkable()
+        {
+            return false;
+        }
+        public bool IsExecutable(byte baitCode)
+        {
+            return baitCode == BaitCodeList["movrr"] ||
+                baitCode == BaitCodeList["movrm"] ||
+                baitCode == BaitCodeList["movrc"] ||
+                baitCode == BaitCodeList["movmr"];
         }
     }
 }

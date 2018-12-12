@@ -18,7 +18,10 @@ namespace AVC
             new MUL(),
             new DIV(),
             new PUSH(),
-            new POP()
+            new POP(),
+            new CMP(),
+            new Jxx(),
+            new INT()
         };
 
 
